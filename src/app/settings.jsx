@@ -36,6 +36,10 @@ export default function Settings() {
   } = useLanguage();
   const [showCurrencyModal, setShowCurrencyModal] = useState(false);
 
+  const handleToggleLanguage = () => {
+    toggleLanguage();
+  };
+
   useEffect(() => {
     loadLanguage();
   }, []);
@@ -107,7 +111,7 @@ export default function Settings() {
 
         {/* Language Toggle */}
         <TouchableOpacity
-          onPress={toggleLanguage}
+          onPress={handleToggleLanguage}
           style={{
             backgroundColor: "#FFFFFF",
             borderRadius: 16,

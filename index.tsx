@@ -13,18 +13,13 @@ global.Buffer = require('buffer').Buffer;
 import 'expo-router/entry';
 import { App } from 'expo-router/build/qualified-entry';
 import type { ReactNode } from 'react';
-import { AppRegistry, LogBox } from 'react-native';
+import { AppRegistry, LogBox, I18nManager } from 'react-native';
 import { DeviceErrorBoundaryWrapper } from './__create/DeviceErrorBoundary';
 import AnythingMenu from './src/__create/anything-menu';
 
-
 function AnythingMenuWrapper({ children }: { children: ReactNode }) {
-  return (
-    <AnythingMenu>
-      {children}
-    </AnythingMenu>
-  );
-};
+  return <AnythingMenu>{children}</AnythingMenu>;
+}
 
 let WrapperComponentProvider = AnythingMenuWrapper;
 
@@ -39,5 +34,6 @@ if (__DEV__) {
     );
   };
 }
+
 AppRegistry.setWrapperComponentProvider(() => WrapperComponentProvider);
 AppRegistry.registerComponent('main', () => App);
