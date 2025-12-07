@@ -112,7 +112,7 @@ export function SettlementReport({
         fontWeight: "600",
       }}
     >
-      📊 {language === "he" ? 'סה"כ עלויות הארוחה' : "Total Meal Cost"}
+      📊 {language === "he" ? 'סה"כ עלויות' : "Total Cost"}
     </Text>
     <Text
       style={{

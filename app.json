@@ -1,11 +1,12 @@
 {
   "expo": {
     "name": "EvenBetter",
-    "version": "1.0.0",
+    "version": "1.0.3",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "scheme": "com.evenbetter.mobileapp",
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
@@ -21,13 +22,15 @@
         "android.permission.RECORD_AUDIO",
         "android.permission.MODIFY_AUDIO_SETTINGS"
       ],
-      "package": "xyz.create.CreateExpoEnvironment"
+      "package": "com.evenbetter.mobileapp",
+      "versionCode": 6
     },
     "plugins": [
       [
         "expo-router",
         {
-          "sitemap": false
+          "sitemap": false,
+          "root": "./src/app"
         }
       ],
       [
@@ -49,11 +52,15 @@
       ],
       [
         "expo-video",
-        { "supportsBackgroundPlayback": true, "supportsPictureInPicture": true }
+        {
+          "supportsBackgroundPlayback": true,
+          "supportsPictureInPicture": true
+        }
       ],
       "expo-font",
       "expo-secure-store",
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-asset"
     ],
     "web": {
       "bundler": "metro",
@@ -64,12 +71,14 @@
     },
     "extra": {
       "router": {
-        "origin": false
+        "origin": false,
+        "sitemap": false
+      },
+      "eas": {
+        "projectId": "4674c5a4-5c11-4295-b0b8-855adff54f10"
       }
     },
-    "runtimeVersion": {
-      "policy": "appVersion"
-    },
+    "runtimeVersion": "1.0.2",
     "slug": "EvenBetter"
   }
 }

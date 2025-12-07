@@ -19,15 +19,24 @@ export async function shareSettlement(
 
   try {
     // Build the message text
-    let message = `📊 ${t("shareMessage", language)}\n`;
+    let message = `${t("shareMessage", language)}\n`;
     message += "━━━━━━━━━━━━━━━━━━━━\n\n";
 
-    // Summary
-    message += `💰 ${t("generalExpenses", language)}: ${currencySymbol}${settlement.totalGeneral.toFixed(2)}\n`;
-    message += `🥩 ${t("meatExpenses", language)}: ${currencySymbol}${settlement.totalMeat.toFixed(2)}\n\n`;
+    // 1. Total meal cost
+        const totalMealCost = settlement.totalGeneral + settlement.totalMeat;
+        message += `📊 ${language === "he" ? 'סה"כ עלויות' : "Total Cost"}: ${currencySymbol}${totalMealCost.toFixed(2)}\n\n`;
 
-    message += `💸 ${language === "he" ? "תשלומים להעברה" : "Payments to Transfer"}:\n`;
-    message += "━━━━━━━━━━━━━━━━━━━━\n";
+    // 2. Summary
+        message += `💰 ${t("generalExpenses", language)}: ${currencySymbol}${settlement.totalGeneral.toFixed(2)}\n`;
+        message += `🥩 ${t("meatExpenses", language)}: ${currencySymbol}${settlement.totalMeat.toFixed(2)}\n\n`;
+
+   // 3. Per person costs
+        message += `🌱 ${language === "he" ? "עלות לאדם צמחוני" : "Cost per Vegetarian"}: ${currencySymbol}${settlement.generalPerPerson.toFixed(2)}\n`;
+        message += `🍖 ${language === "he" ? "עלות לאדם לא צמחוני" : "Cost per Non-Veg"}: ${currencySymbol}${(settlement.generalPerPerson + settlement.meatPerPerson).toFixed(2)}\n\n`;
+
+    // 4. Transactions
+        message += `💸 ${language === "he" ? "תשלומים להעברה" : "Payments to Transfer"}:\n`;
+        message += "━━━━━━━━━━━━━━━━━━━━\n";
 
     // Transactions - using ← arrow for RTL Hebrew, → for LTR English
     const arrow = language === "he" ? "←" : "→";
