@@ -14,11 +14,10 @@ export function SettlementReport({
   roundAmounts,
   setRoundAmounts,
   onShare,
-  language = "he",
 }) {
   const shareButtonScale = useSharedValue(1);
+  const { language, currency } = useLanguage();
   const isRTL = language === "he";
-  const { currency } = useLanguage();
   const currencySymbol = getCurrencySymbol(currency);
 
   const animatedShareButtonStyle = useAnimatedStyle(() => ({
