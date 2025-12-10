@@ -200,6 +200,9 @@ export function ParticipantForm({
               onChangeText={handleTotalAmountChange}
               keyboardType="decimal-pad"
               editable={participantName.trim().length > 0}
+              autoComplete="off"
+              textContentType="none"
+              importantForAutofill="no"
               style={{
                 backgroundColor: "#EEF2FF",
                 borderWidth: 2,
@@ -238,6 +241,9 @@ export function ParticipantForm({
                 onChangeText={handleGeneralAmountChange}
                 keyboardType="decimal-pad"
                 editable={!!(totalAmount && parseFloat(totalAmount) > 0)}
+                autoComplete="off"
+                textContentType="none"
+                importantForAutofill="no"
                 style={{
                   backgroundColor: "#FEF3F2",
                   borderWidth: 2,
@@ -271,6 +277,9 @@ export function ParticipantForm({
                 onChangeText={handleMeatAmountChange}
                 keyboardType="decimal-pad"
                 editable={!!(totalAmount && parseFloat(totalAmount) > 0)}
+                autoComplete="off"
+                textContentType="none"
+                importantForAutofill="no"
                 style={{
                   backgroundColor: "#FFF4ED",
                   borderWidth: 2,
