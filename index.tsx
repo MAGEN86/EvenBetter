@@ -16,10 +16,12 @@ import type { ReactNode } from 'react';
 import { AppRegistry, LogBox, I18nManager } from 'react-native';
 import { DeviceErrorBoundaryWrapper } from './__create/DeviceErrorBoundary';
 import AnythingMenu from './src/__create/anything-menu';
+
 if (I18nManager.isRTL) {
   I18nManager.allowRTL(false);
   I18nManager.forceRTL(false);
 }
+
 function AnythingMenuWrapper({ children }: { children: ReactNode }) {
   return <AnythingMenu>{children}</AnythingMenu>;
 }
