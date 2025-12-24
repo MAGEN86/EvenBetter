@@ -46,11 +46,13 @@ export default function BillSplitter() {
     handleMeatAmountChange,
     handleGeneralAmountChange,
     settlement,
+    eventName,
+    setEventName,
   } = useBillSplitter();
 
-  const handleShare = () => {
-    shareSettlement(settlement, roundAmounts, language, currency);
-  };
+   const handleShare = () => {
+       shareSettlement(settlement, roundAmounts, language, currency, eventName);
+   };
 
   if (!isLoaded) {
     return <View style={{ flex: 1, backgroundColor: "#667eea" }} />;
@@ -131,7 +133,10 @@ export default function BillSplitter() {
               handleTotalAmountChange={handleTotalAmountChange}
               handleMeatAmountChange={handleMeatAmountChange}
               handleGeneralAmountChange={handleGeneralAmountChange}
+              eventName={eventName}
+              setEventName={setEventName}
               language={language}
+              participants={participants}
             />
 
             {/* Participants List */}
@@ -151,7 +156,9 @@ export default function BillSplitter() {
                 roundAmounts={roundAmounts}
                 setRoundAmounts={setRoundAmounts}
                 onShare={handleShare}
+                eventName={eventName}
                 language={language}
+                participants={participants}
               />
             )}
 

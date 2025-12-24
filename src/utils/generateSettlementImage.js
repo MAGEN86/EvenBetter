@@ -6,6 +6,7 @@ export async function generateSettlementImage(
   settlement,
   roundAmounts,
   currency = "ILS",
+  eventName = "",
 ) {
   const currencySymbol = getCurrencySymbol(currency);
 
@@ -39,13 +40,13 @@ export async function generateSettlementImage(
     const headerPaint = createPaint("#3562FF");
     canvas.drawRect(Skia.XYWHRect(0, 0, width, 120), headerPaint);
 
-    // Title
-    const titlePaint = createPaint("#FFFFFF");
-    const titleFont = Skia.Font(null, 32);
-    const titleText = "סיכום חשבון ✅";
-    const titleBlob = Skia.TextBlob.MakeFromText(titleText, titleFont);
-    const titleWidth = titleFont.measureText(titleText);
-    canvas.drawTextBlob(titleBlob, (width - titleWidth) / 2, 50, titlePaint);
+// Title
+const titlePaint = createPaint("#FFFFFF");
+const titleFont = Skia.Font(null, 32);
+const titleText = eventName ? `${eventName} ✅` : "סיכום חשבון ✅";
+const titleBlob = Skia.TextBlob.MakeFromText(titleText, titleFont);
+const titleWidth = titleFont.measureText(titleText);
+canvas.drawTextBlob(titleBlob, (width - titleWidth) / 2, 50, titlePaint);
 
     // Subtitle
     const subtitlePaint = createPaint("#E0E7FF");

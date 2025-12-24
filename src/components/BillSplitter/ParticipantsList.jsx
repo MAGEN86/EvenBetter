@@ -314,17 +314,29 @@ export function ParticipantsList({
             <View
               style={{ flex: 1, alignItems: isRTL ? "flex-end" : "flex-start" }}
             >
-              <Text
-                style={{
-                  fontSize: 16,
-                  fontWeight: "700",
-                  color: colorSet.text,
-                  writingDirection: isRTL ? "rtl" : "ltr",
-                  textAlign: isRTL ? "right" : "left",
-                }}
-              >
-                {p.name}
-              </Text>
+<View
+  style={{
+    flexDirection: isRTL ? "row-reverse" : "row",
+    alignItems: "center",
+    gap: 6,
+  }}
+>
+  <Text style={{ fontSize: 16 }}>
+    {p.isVegetarian ? "🌱" : "🍖"}
+  </Text>
+
+  <Text
+    style={{
+      fontSize: 16,
+      fontWeight: "700",
+      color: colorSet.text,
+      writingDirection: isRTL ? "rtl" : "ltr",
+      textAlign: isRTL ? "right" : "left",
+    }}
+  >
+    {p.name}
+  </Text>
+</View>
               <Text
                 style={{
                   fontSize: 13,
@@ -335,7 +347,6 @@ export function ParticipantsList({
                   textAlign: isRTL ? "right" : "left",
                 }}
               >
-                {p.isVegetarian ? "🌱" : "🍖"}
                 {participantExpense && (
                   <>
                     {" • "}

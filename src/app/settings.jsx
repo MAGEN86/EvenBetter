@@ -6,10 +6,12 @@ import {
   Linking,
   Modal,
   Pressable,
+  Switch,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { Image } from "react-native";
 import {
   ArrowRight,
   ArrowLeft,
@@ -18,10 +20,15 @@ import {
   Info,
   Languages,
   DollarSign,
+  Share2,
 } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { useLanguage } from "@/utils/useLanguage";
 import { t } from "@/utils/translations";
+import {
+  getShareIncludeImage,
+  setShareIncludeImage,
+} from "@/utils/settings/sharePrefs";
 
 export default function Settings() {
   const insets = useSafeAreaInsets();
@@ -34,7 +41,12 @@ export default function Settings() {
     loadLanguage,
     isLoaded,
   } = useLanguage();
+
   const [showCurrencyModal, setShowCurrencyModal] = useState(false);
+
+  // ✅ New: share preference
+  const [includeImageInShare, setIncludeImageInShareState] = useState(false);
+
 
   const handleToggleLanguage = () => {
     toggleLanguage();
@@ -42,6 +54,11 @@ export default function Settings() {
 
   useEffect(() => {
     loadLanguage();
+
+    (async () => {
+      const v = await getShareIncludeImage();
+      setIncludeImageInShareState(v);
+    })();
   }, []);
 
   const handleEmailPress = () => {
@@ -141,7 +158,7 @@ export default function Settings() {
                 color: "#667eea",
               }}
             >
-              {language === "he" ? "English" : "עברית"}
+              {language === "he" ? "עברית" : "English"}
             </Text>
           </View>
           <View
@@ -219,6 +236,96 @@ export default function Settings() {
             </Text>
           </View>
         </TouchableOpacity>
+
+        {/* ✅ NEW: Share Preference (Image + Text vs Text Only) */}
+        <View
+          style={{
+            backgroundColor: "#FFFFFF",
+            borderRadius: 16,
+            padding: 16,
+            marginBottom: 16,
+            borderWidth: 1,
+            borderColor: "#E5E7EB",
+          }}
+        >
+          <View
+            style={{
+              flexDirection: isRTL ? "row-reverse" : "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 12,
+            }}
+          >
+            <View
+              style={{
+                flexDirection: isRTL ? "row-reverse" : "row",
+                alignItems: "center",
+                gap: 12,
+                flex: 1,
+              }}
+            >
+              <Share2 size={20} color="#6B7280" />
+              <Text
+                style={{
+                  fontSize: 16,
+                  fontWeight: "600",
+                  color: "#0F172A",
+                  textAlign: isRTL ? "right" : "left",
+                  writingDirection: isRTL ? "rtl" : "ltr",
+                  flex: 1,
+                }}
+              >
+                {language === "he"
+                  ? "שיתוף: לצרף תמונה לדוח"
+                  : "Share: include image in report"}
+              </Text>
+            </View>
+
+            <Switch
+              value={includeImageInShare}
+              onValueChange={async (v) => {
+                setIncludeImageInShareState(v);
+                await setShareIncludeImage(v);
+              }}
+            />
+          </View>
+          {/* 🦊 Foxy – הסבר עדין */}
+          <View
+            style={{
+              flexDirection: isRTL ? "row-reverse" : "row",
+              alignItems: "center",
+              gap: 12,
+              marginTop: 12,
+              backgroundColor: "#F8FAFC",
+              padding: 12,
+              borderRadius: 12,
+            }}
+          >
+            <Image
+              source={require("../../assets/images/FoxyNoBG.png")}
+              style={{ width: 64, height: 64 }}
+              resizeMode="contain"
+            />
+
+            <Text
+              style={{
+                flex: 1,
+                fontSize: 13,
+                color: "#6B7280",
+                lineHeight: 18,
+                textAlign: isRTL ? "right" : "left",
+                writingDirection: isRTL ? "rtl" : "ltr",
+              }}
+            >
+              {language === "he"
+                ? "לפעמים וואטסאפ שולח רק תמונה בלי טקסט. לכן זה כבוי כברירת מחדל — מוזמנים להדליק ולנסות."
+                : "WhatsApp may sometimes send only the image without text. That’s why it’s off by default - feel free to turn it on and try."}
+            </Text>
+          </View>
+
+
+
+        </View>
 
         {/* Currency Modal */}
         <Modal

@@ -1,13 +1,19 @@
-import { View, Text, TextInput, TouchableOpacity } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
 import { UserPlus } from "lucide-react-native";
 import KeyboardAvoidingAnimatedView from "@/components/KeyboardAvoidingAnimatedView";
+import { LinearGradient } from "expo-linear-gradient";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
+  FadeInUp,
+  FadeOutUp,
+  FadeInDown,
+  FadeOutDown,
 } from "react-native-reanimated";
 import { t, getCurrencySymbol } from "@/utils/translations";
 import { useLanguage } from "@/utils/useLanguage";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 export function ParticipantForm({
   participantName,
@@ -24,15 +30,61 @@ export function ParticipantForm({
   handleTotalAmountChange,
   handleMeatAmountChange,
   handleGeneralAmountChange,
+  eventName,
+  setEventName,
+  participants = [],
   language = "he",
 }) {
   const buttonScale = useSharedValue(1);
+  const headerScale = useSharedValue(1);
+
   const isRTL = language === "he";
   const { currency } = useLanguage();
   const currencySymbol = getCurrencySymbol(currency);
 
+  const safeEventName = useMemo(() => (eventName ?? "").toString(), [eventName]);
+  const hasEventName = safeEventName.trim().length > 0;
+
+  // ✅ נרמול שם: מוריד רווחים מיותרים ומקטין אותיות
+  const normalizeName = (name) =>
+    (name ?? "")
+      .toString()
+      .trim()
+      .replace(/\s+/g, " ")
+      .toLowerCase();
+
+  // השם שהמשתמש הקליד, אחרי נרמול
+  const normalizedInputName = normalizeName(participantName);
+
+  // בדיקה אם כבר יש משתתף עם אותו שם
+  const isDuplicateParticipantName = useMemo(() => {
+    if (!normalizedInputName) return false;
+    return participants.some((p) => normalizeName(p?.name) === normalizedInputName);
+  }, [participants, normalizedInputName]);
+
+  // האם מותר להוסיף
+  const canAdd = participantName.trim().length > 0 && !isDuplicateParticipantName;
+
+  // מתחילים בעריכה רק אם אין שם אירוע
+  const [isEditingEventName, setIsEditingEventName] = useState(!hasEventName);
+
+  const eventNameInputRef = useRef(null);
+
+  // Auto-focus כשעוברים לעריכה
+  useEffect(() => {
+    if (isEditingEventName) {
+      requestAnimationFrame(() => {
+        eventNameInputRef.current?.focus?.();
+      });
+    }
+  }, [isEditingEventName]);
+
   const animatedButtonStyle = useAnimatedStyle(() => ({
     transform: [{ scale: buttonScale.value }],
+  }));
+
+  const animatedHeaderStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: headerScale.value }],
   }));
 
   const handlePressIn = () => {
@@ -41,6 +93,16 @@ export function ParticipantForm({
 
   const handlePressOut = () => {
     buttonScale.value = withSpring(1, { damping: 10, stiffness: 400 });
+  };
+
+  const enterEditMode = () => {
+    setIsEditingEventName(true);
+  };
+
+  const exitEditModeIfValid = () => {
+    if ((safeEventName ?? "").trim().length > 0) {
+      setIsEditingEventName(false);
+    }
   };
 
   return (
@@ -58,17 +120,110 @@ export function ParticipantForm({
           elevation: 10,
         }}
       >
-        <Text
-          style={{
-            fontSize: 18,
-            fontWeight: "700",
-            color: "#667eea",
-            marginBottom: 16,
-            textAlign: isRTL ? "right" : "left",
-          }}
-        >
-          🎯 {t("addExpense", language)}
-        </Text>
+        {/* Event Name */}
+        {isEditingEventName ? (
+          // מצב עריכה - TextInput עם "מסגרת" גרדיאנט
+          <Animated.View
+            entering={FadeInDown.duration(180)}
+            exiting={FadeOutUp.duration(140)}
+            style={{
+              flexDirection: isRTL ? "row-reverse" : "row",
+              alignItems: "center",
+              gap: 8,
+              marginBottom: 16,
+            }}
+          >
+            <LinearGradient
+              colors={["#667eea", "#764ba2"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={{
+                borderRadius: 14,
+                padding: 2, // עובי המסגרת
+                flex: 1,
+              }}
+            >
+              <View
+                style={{
+                  backgroundColor: "#FFFFFF",
+                  borderRadius: 12,
+                  paddingHorizontal: 12,
+                  paddingVertical: 8,
+                }}
+              >
+                <TextInput
+                  ref={eventNameInputRef}
+                  placeholder={
+                    language === "he"
+                      ? "🎉 שם האירוע (אופציונלי)..."
+                      : "🎉 Event Name (optional)..."
+                  }
+                  value={safeEventName}
+                  onChangeText={setEventName}
+                  style={{
+                    fontSize: 15,
+                    color: "#0F172A",
+                    textAlign: isRTL ? "right" : "left",
+                    paddingVertical: 6,
+                  }}
+                  placeholderTextColor="#9CA3AF"
+                  returnKeyType="done"
+                  onSubmitEditing={exitEditModeIfValid}
+                  onBlur={exitEditModeIfValid}
+                />
+              </View>
+            </LinearGradient>
+          </Animated.View>
+        ) : hasEventName ? (
+          // מצב תצוגה - כותרת צבעונית (לחיצה נכנסת לעריכה)
+          <Animated.View
+            entering={FadeInUp.duration(180)}
+            exiting={FadeOutDown.duration(140)}
+            style={[{ marginBottom: 16 }, animatedHeaderStyle]}
+          >
+            <TouchableOpacity
+              activeOpacity={0.9}
+              onPress={enterEditMode}
+              onPressIn={() => {
+                headerScale.value = withSpring(0.96, { damping: 14, stiffness: 300 });
+              }}
+              onPressOut={() => {
+                headerScale.value = withSpring(1, { damping: 14, stiffness: 300 });
+              }}
+            >
+              <LinearGradient
+                colors={["#667eea", "#764ba2"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={{
+                  borderRadius: 18,
+                  paddingVertical: 18,
+                  paddingHorizontal: 20,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  shadowColor: "#667eea",
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.25,
+                  shadowRadius: 12,
+                  elevation: 6,
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: 20,
+                    fontWeight: "800",
+                    color: "#FFFFFF",
+                    textAlign: "center",
+                  }}
+                  numberOfLines={2}
+                  ellipsizeMode="tail"
+                >
+                  {safeEventName.trim()}
+                </Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </Animated.View>
+        ) : null}
 
         {/* Participant Info */}
         <View
@@ -97,6 +252,7 @@ export function ParticipantForm({
             placeholder={t("participantName", language) + "..."}
             value={participantName}
             onChangeText={setParticipantName}
+            maxLength={16}
             style={{
               backgroundColor: "#FFFFFF",
               borderWidth: 2,
@@ -111,6 +267,21 @@ export function ParticipantForm({
             }}
             placeholderTextColor="#9CA3AF"
           />
+
+          {isDuplicateParticipantName ? (
+            <Text
+              style={{
+                marginTop: -6,
+                marginBottom: 12,
+                fontSize: 12,
+                color: "#DC2626",
+                textAlign: isRTL ? "right" : "left",
+                fontWeight: "600",
+              }}
+            >
+              {language === "he" ? "⚠️ השם הזה כבר קיים ברשימה" : "⚠️ This name already exists"}
+            </Text>
+          ) : null}
 
           <TouchableOpacity
             onPress={() => setIsVegetarian(!isVegetarian)}
@@ -128,6 +299,7 @@ export function ParticipantForm({
             <Text style={{ fontSize: 14, color: "#764ba2", fontWeight: "600" }}>
               🌱 {t("isVegetarian", language)}?
             </Text>
+
             <View
               style={{
                 width: 56,
@@ -194,15 +366,13 @@ export function ParticipantForm({
                 ? `סכום כולל (${currencySymbol})`
                 : `Total Amount (${currencySymbol})`}
             </Text>
+
             <TextInput
               placeholder="0.00"
               value={totalAmount}
               onChangeText={handleTotalAmountChange}
               keyboardType="decimal-pad"
               editable={participantName.trim().length > 0}
-              autoComplete="off"
-              textContentType="none"
-              importantForAutofill="no"
               style={{
                 backgroundColor: "#EEF2FF",
                 borderWidth: 2,
@@ -220,9 +390,7 @@ export function ParticipantForm({
             />
           </View>
 
-          <View
-            style={{ flexDirection: isRTL ? "row-reverse" : "row", gap: 12 }}
-          >
+          <View style={{ flexDirection: isRTL ? "row-reverse" : "row", gap: 12 }}>
             <View style={{ flex: 1 }}>
               <Text
                 style={{
@@ -235,15 +403,13 @@ export function ParticipantForm({
               >
                 💵 {t("general", language)}
               </Text>
+
               <TextInput
                 placeholder="0.00"
                 value={generalAmount}
                 onChangeText={handleGeneralAmountChange}
                 keyboardType="decimal-pad"
                 editable={!!(totalAmount && parseFloat(totalAmount) > 0)}
-                autoComplete="off"
-                textContentType="none"
-                importantForAutofill="no"
                 style={{
                   backgroundColor: "#FEF3F2",
                   borderWidth: 2,
@@ -259,6 +425,7 @@ export function ParticipantForm({
                 placeholderTextColor="#9CA3AF"
               />
             </View>
+
             <View style={{ flex: 1 }}>
               <Text
                 style={{
@@ -271,15 +438,13 @@ export function ParticipantForm({
               >
                 🥩 {t("meat", language)}
               </Text>
+
               <TextInput
                 placeholder="0.00"
                 value={meatAmount}
                 onChangeText={handleMeatAmountChange}
                 keyboardType="decimal-pad"
                 editable={!!(totalAmount && parseFloat(totalAmount) > 0)}
-                autoComplete="off"
-                textContentType="none"
-                importantForAutofill="no"
                 style={{
                   backgroundColor: "#FFF4ED",
                   borderWidth: 2,
@@ -300,13 +465,24 @@ export function ParticipantForm({
 
         <Animated.View style={animatedButtonStyle}>
           <TouchableOpacity
-            onPress={onAddParticipant}
+            onPress={() => {
+              if (isDuplicateParticipantName) {
+                Alert.alert(
+                  language === "he" ? "שם כבר קיים" : "Name already exists",
+                  language === "he"
+                    ? "יש כבר משתתף עם השם הזה. בחר שם אחר."
+                    : "A participant with the same name already exists. Please choose a different name."
+                );
+                return;
+              }
+              onAddParticipant?.();
+            }}
             onPressIn={handlePressIn}
             onPressOut={handlePressOut}
-            disabled={!participantName.trim()}
+            disabled={!canAdd}
             activeOpacity={0.9}
             style={{
-              backgroundColor: participantName.trim() ? "#667eea" : "#E5E7EB",
+              backgroundColor: canAdd ? "#667eea" : "#E5E7EB",
               borderRadius: 14,
               paddingVertical: 16,
               paddingHorizontal: 20,
@@ -314,7 +490,7 @@ export function ParticipantForm({
               alignItems: "center",
               justifyContent: "center",
               gap: 10,
-              shadowColor: participantName.trim() ? "#667eea" : "transparent",
+              shadowColor: canAdd ? "#667eea" : "transparent",
               shadowOffset: { width: 0, height: 4 },
               shadowOpacity: 0.4,
               shadowRadius: 8,
@@ -323,17 +499,15 @@ export function ParticipantForm({
           >
             <Text
               style={{
-                color: participantName.trim() ? "#FFFFFF" : "#6B7280",
+                color: canAdd ? "#FFFFFF" : "#6B7280",
                 fontSize: 16,
                 fontWeight: "700",
               }}
             >
               {t("addParticipant", language)}
             </Text>
-            <UserPlus
-              size={20}
-              color={participantName.trim() ? "#FFFFFF" : "#6B7280"}
-            />
+
+            <UserPlus size={20} color={canAdd ? "#FFFFFF" : "#6B7280"} />
           </TouchableOpacity>
         </Animated.View>
       </View>

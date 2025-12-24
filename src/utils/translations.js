@@ -3,7 +3,7 @@ export const translations = {
     // Main screen
     title: "חלוקת הוצאות",
     subtitle: "חלקו הוצאות בצורה הוגנת בין חברים",
-    addParticipant: "הוסף משתתף",
+    addParticipant: "הוספת משתתף",
     participantName: "שם המשתתף",
     isVegetarian: "צמחוני",
     addExpense: "הוספת הוצאה",
@@ -11,7 +11,7 @@ export const translations = {
     generalExpense: "הוצאה כללית",
     meatExpense: "הוצאת בשר",
     add: "הוסף",
-    participantsList: "רשימת משתתפים",
+    participantsList: "משתתפים",
     calculate: "חשב",
     reset: "איפוס",
     resetConfirmTitle: "איפוס",
@@ -40,7 +40,7 @@ export const translations = {
     owes: "חייב",
     share: "שתף",
     close: "סגור",
-    shareMessage: "דוח חלוקת הוצאות - EvenBetter",
+    shareMessage: "דוח חלוקת הוצאות",
 
     // Errors
     errorParticipantName: "אנא הזן שם משתתף",
@@ -104,7 +104,7 @@ export const translations = {
     generalExpense: "General Expense",
     meatExpense: "Meat Expense",
     add: "Add",
-    participantsList: "Participants List",
+    participantsList: "Participants",
     calculate: "Calculate",
     reset: "Reset",
     resetConfirmTitle: "Reset",
@@ -134,7 +134,7 @@ export const translations = {
     owes: "Owes",
     share: "Share",
     close: "Close",
-    shareMessage: "Expense Split Report - EvenBetter",
+    shareMessage: "Expense Split Report",
 
     // Errors
     errorParticipantName: "Please enter a participant name",

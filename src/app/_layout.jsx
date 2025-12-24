@@ -1,17 +1,18 @@
+import { useAuth } from "@/utils/auth/useAuth";
+import { useLanguage } from "@/utils/useLanguage";
+import { Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
+import { useEffect } from "react";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-import { useAuth } from '@/utils/auth/useAuth';
-import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutes
-      cacheTime: 1000 * 60 * 30, // 30 minutes
+      staleTime: 1000 * 60 * 5,
+      cacheTime: 1000 * 60 * 30,
       retry: 1,
       refetchOnWindowFocus: false,
     },
@@ -21,17 +22,24 @@ const queryClient = new QueryClient({
 export default function RootLayout() {
   const { initiate, isReady } = useAuth();
 
-  useEffect(() => {
-    initiate();
-  }, [initiate]);
+  const { loadLanguage, isLoaded: isLangLoaded, language, currency } = useLanguage();
 
   useEffect(() => {
-    if (isReady) {
+    console.log("[RootLayout] initiate auth + loadLanguage");
+    initiate();
+    loadLanguage();
+  }, [initiate, loadLanguage]);
+
+  useEffect(() => {
+    console.log("[RootLayout] readiness:", { isReady, isLangLoaded, language, currency });
+
+    if (isReady && isLangLoaded) {
       SplashScreen.hideAsync();
     }
-  }, [isReady]);
+  }, [isReady, isLangLoaded, language, currency]);
 
-  if (!isReady) {
+  // לא מציגים כלום עד ששניהם מוכנים
+  if (!isReady || !isLangLoaded) {
     return null;
   }
 

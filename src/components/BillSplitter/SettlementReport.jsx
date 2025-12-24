@@ -1,5 +1,6 @@
 import { View, Text, TouchableOpacity } from "react-native";
 import { Share2 } from "lucide-react-native";
+import { FontAwesome } from "@expo/vector-icons";
 import Animated, {
   FadeInDown,
   useAnimatedStyle,
@@ -8,12 +9,16 @@ import Animated, {
 } from "react-native-reanimated";
 import { t, getCurrencySymbol } from "@/utils/translations";
 import { useLanguage } from "@/utils/useLanguage";
+import { LinearGradient } from "expo-linear-gradient";
+
 
 export function SettlementReport({
   settlement,
   roundAmounts,
   setRoundAmounts,
   onShare,
+  eventName,
+  participants,
 }) {
   const shareButtonScale = useSharedValue(1);
   const { language, currency } = useLanguage();
@@ -33,6 +38,7 @@ export function SettlementReport({
   };
 
   if (!settlement) return null;
+    const vegByName = new Map((participants || []).map((p) => [p.name, p.isVegetarian]));
 
   return (
     <Animated.View
@@ -49,17 +55,55 @@ export function SettlementReport({
         elevation: 10,
       }}
     >
-      <Text
-        style={{
-          fontSize: 18,
-          fontWeight: "700",
-          color: "#667eea",
-          marginBottom: 16,
-          textAlign: isRTL ? "right" : "left",
-        }}
-      >
-        📊 {t("settlementReport", language)}
-      </Text>
+<View style={{ marginBottom: 16 }}>
+<LinearGradient
+  colors={["#667eea", "#764ba2"]}
+  start={{ x: 0, y: 0 }}
+  end={{ x: 1, y: 1 }}
+  style={{
+    borderRadius: 18,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    shadowColor: "#667eea",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.18,
+    shadowRadius: 12,
+    elevation: 5,
+  }}
+>
+  {/* שורה ראשית */}
+  <Text
+    style={{
+      fontSize: eventName ? 16 : 18,
+      fontWeight: "800",
+      color: "#FFFFFF",
+      textAlign: "center",
+    }}
+    numberOfLines={1}
+    ellipsizeMode="tail"
+  >
+    {eventName ? eventName : t("settlementReport", language)}
+  </Text>
+
+  {/* שורת משנה – רק אם יש שם אירוע */}
+  {eventName && (
+    <Text
+      style={{
+        marginTop: 4,
+        fontSize: 12,
+        fontWeight: "600",
+        color: "rgba(255,255,255,0.88)",
+        textAlign: "center",
+      }}
+      numberOfLines={1}
+      ellipsizeMode="tail"
+    >
+      {t("settlementReport", language)}
+    </Text>
+  )}
+</LinearGradient>
+</View>
+
 
       {settlement.error ? (
         <View
@@ -148,7 +192,7 @@ export function SettlementReport({
           fontSize: 12,
           color: "#166534",
           marginBottom: 6,
-          textAlign: isRTL ? "right" : "left",
+          textAlign: "center",
           fontWeight: "600",
         }}
       >
@@ -159,7 +203,7 @@ export function SettlementReport({
           fontSize: 22,
           fontWeight: "700",
           color: "#16A34A",
-          textAlign: isRTL ? "right" : "left",
+          textAlign: "center",
         }}
       >
         {currencySymbol}
@@ -183,7 +227,7 @@ export function SettlementReport({
           fontSize: 12,
           color: "#9A3412",
           marginBottom: 6,
-          textAlign: isRTL ? "right" : "left",
+          textAlign: "center",
           fontWeight: "600",
         }}
       >
@@ -194,7 +238,7 @@ export function SettlementReport({
           fontSize: 22,
           fontWeight: "700",
           color: "#EA580C",
-          textAlign: isRTL ? "right" : "left",
+          textAlign: "center",
         }}
       >
         {currencySymbol}
@@ -236,20 +280,45 @@ export function SettlementReport({
                   <View
                     style={{
                       flex: 1,
+                      minWidth: 0, // ✅ חשוב
                       alignItems: isRTL ? "flex-end" : "flex-start",
                     }}
                   >
-                    <Text
+                    <View
                       style={{
-                        fontSize: 15,
-                        fontWeight: "700",
-                        color: "#667eea",
+                        flexDirection: isRTL ? "row-reverse" : "row",
+                        alignItems: "center",
+                        gap: 6,
+                        alignSelf: isRTL ? "flex-end" : "flex-start",
                       }}
                     >
-                      {balance.name}
-                    </Text>
+                      <Text style={{ fontSize: 15 }}>
+                        {vegByName.get(balance.name) ? "🌱" : "🍖"}
+                      </Text>
+
+                      <Text
+                        style={{
+                          fontSize: 15,
+                          fontWeight: "700",
+                          color: "#667eea",
+                          textAlign: isRTL ? "right" : "left",
+                          writingDirection: isRTL ? "rtl" : "ltr",
+                          alignSelf: isRTL ? "flex-end" : "flex-start",
+                        }}
+                      >
+                        {balance.name}
+                      </Text>
+                    </View>
                     <Text
-                      style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}
+                      style={{
+                        fontSize: 12,
+                        color: "#6B7280",
+                        marginTop: 2,
+
+                        textAlign: isRTL ? "right" : "left",
+                        writingDirection: isRTL ? "rtl" : "ltr",
+                        alignSelf: isRTL ? "flex-end" : "flex-start",
+                      }}
                     >
                       {language === "he"
                         ? `עלות: ${currencySymbol}${balance.share.toFixed(2)} • שילם: ${currencySymbol}${balance.paid.toFixed(2)}`
@@ -259,21 +328,27 @@ export function SettlementReport({
                   <View
                     style={{
                       backgroundColor: "rgba(255, 255, 255, 0.9)",
-                      paddingHorizontal: 10,
+                      paddingHorizontal: 6,
                       paddingVertical: 6,
                       borderRadius: 8,
+                      minWidth: 68,   // ✅ שהטקסט לא ייכנס אליו
+                      flexShrink: 0,  // ✅ שלא יידחס
+                      justifyContent: "center",
+                      alignSelf: "center",
                     }}
                   >
                     <Text
                       style={{
-                        fontSize: 14,
+                        fontSize: balance.balance === 0 ? 18 : 14,   // ✅ ה־✓ קצת גדול יותר
                         fontWeight: "700",
+                        lineHeight: balance.balance === 0 ? 18 : 14, // ✅ קריטי למרכז אנכי
                         color:
                           balance.balance > 0.01
                             ? "#10B981"
                             : balance.balance < -0.01
                               ? "#F04438"
                               : "#6B7280",
+                        textAlign: "center",
                       }}
                     >
                       {balance.balance > 0.01
@@ -309,8 +384,8 @@ export function SettlementReport({
                 >
                   💸{" "}
                   {language === "he"
-                    ? "תשלומים להעברה"
-                    : "Payments to Transfer"}
+                    ? "תשלומים"
+                    : "Payments"}
                 </Text>
                 <TouchableOpacity
                   onPress={() => setRoundAmounts(!roundAmounts)}
@@ -370,7 +445,7 @@ export function SettlementReport({
                       padding: 16,
                       marginBottom: 10,
                       flexDirection: isRTL ? "row-reverse" : "row",
-                      alignItems: "center",
+                      alignItems: "flex-start",
                       justifyContent: "space-between",
                       borderWidth: 2,
                       borderColor: "#D8B4FE",
@@ -383,20 +458,26 @@ export function SettlementReport({
                   >
                     <View
                       style={{
+                        flex: 1,
+                        minWidth: 0, // ✅ חובה כדי לאפשר שבירה אמיתית
                         flexDirection: isRTL ? "row-reverse" : "row",
+                        flexWrap: "wrap", // ✅ ירידת שורה
                         alignItems: "center",
-                        gap: 8,
+                        gap: 8, // אם ה-RN שלך תומך gap זה בסדר להשאיר
                       }}
                     >
+
                       <Text
                         style={{
                           fontSize: 15,
                           fontWeight: "700",
                           color: "#764ba2",
+                          flexShrink: 1, // ✅ מאפשר להישבר
                         }}
                       >
                         {t.from}
                       </Text>
+
                       <Text style={{ fontSize: 16, color: "#6B7280" }}>
                         {isRTL ? "←" : "→"}
                       </Text>
@@ -405,6 +486,7 @@ export function SettlementReport({
                           fontSize: 15,
                           fontWeight: "700",
                           color: "#764ba2",
+                          flexShrink: 1, // ✅ מאפשר להישבר
                         }}
                       >
                         {t.to}
@@ -413,11 +495,20 @@ export function SettlementReport({
                     <View
                       style={{
                         backgroundColor: "rgba(255, 255, 255, 0.8)",
-                        paddingHorizontal: 12,
-                        paddingVertical: 6,
-                        borderRadius: 8,
+                        borderRadius: 6,      // 🔹 קצת פחות עגול
+                        minWidth: 72,         // 🔹 קטן יותר
+                        height: 28,           // 🔹 גובה קבוע וקטן
+                        paddingHorizontal: 8, // 🔹 פחות רווח
+                        flexShrink: 0,
+                        alignSelf: "center",
+
+                        // ✅ מרכז אמיתי
+                        alignItems: "center",
+                        justifyContent: "center",
                       }}
                     >
+
+
                       <Text
                         style={{
                           fontSize: 18,
