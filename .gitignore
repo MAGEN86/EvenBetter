@@ -66,3 +66,13 @@ caches/*
 *.orig.*
 *.tsbuildinfo
 app-example
+# Android keystores
+*.keystore
+*.jks
+android/app/debug.keystore
+
+# Android local config
+android/local.properties
+
+# IDE
+.idea/
